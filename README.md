@@ -56,23 +56,23 @@ report, which ranks careers on an overall index based on job stress
 levels, projected career growth outlook, and work environment. Sure
 enough, in 2013, there it was in the number one slot:
 
-(./topjob2013.JPG)
+[](./topjob2013.JPG)
 
 I love being an actuary, and I think most actuaries love being
 actuaries, so I shimmied on over to the [CareerCast Top 200 Careers of
 2019](https://www.careercast.com/jobs-rated/2019-jobs-rated-report)
 report, and there it was, halfway down the Top 20 at \#10.
 
-(./actuaryjob2019.JPG)
+[](./actuaryjob2019.JPG)
 
 What happened? And what had taken the top spot? Was it… no.. it couldn’t
 be. Could it?
 
-(./dsjob2019.JPG)
+[](./dsjob2019.JPG)
 
 Of course it’s No. 1. *Touché*.
 
-(./newman.jpg)
+[](./newman.jpg)
 
     library(tidyverse)
 
