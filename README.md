@@ -8,7 +8,7 @@ strategy was the widely cited career outlook for actuaries around that
 period of time. For example, from
 [BeAnActuary.org](https://beanactuary.org/why/?fa=a-top-ranked-job):
 
-[](https://github.com/bentwheel/careercast-viz/blob/master/topjob.jpg?raw=true)
+![](https://github.com/bentwheel/careercast-viz/blob/master/topjob.JPG?raw=true)
 
 The link whisks you off to a list of articles, not a single one newer
 than 2016, promoting the high-pay/low-stress benefits of becoming an
@@ -56,23 +56,23 @@ report, which ranks careers on an overall index based on job stress
 levels, projected career growth outlook, and work environment. Sure
 enough, in 2013, there it was in the number one slot:
 
-[](https://github.com/bentwheel/careercast-viz/blob/master/topjob2013.JPG?raw=true)
+![](https://github.com/bentwheel/careercast-viz/blob/master/topjob2013.JPG?raw=true)
 
 I love being an actuary, and I think most actuaries love being
 actuaries, so I shimmied on over to the [CareerCast Top 200 Careers of
 2019](https://www.careercast.com/jobs-rated/2019-jobs-rated-report)
 report, and there it was, halfway down the Top 20 at \#10.
 
-[](https://github.com/bentwheel/careercast-viz/blob/master/actuaryjob2019.JPG?raw=true)
+![](https://github.com/bentwheel/careercast-viz/blob/master/actuaryjob2019.JPG?raw=true)
 
 What happened? And what had taken the top spot? Was it… no.. it couldn’t
 be. Could it?
 
-[](https://github.com/bentwheel/careercast-viz/blob/master/dsjob2019.JPG?raw=true)
+![](https://github.com/bentwheel/careercast-viz/blob/master/dsjob2019.JPG?raw=true)
 
 Of course it’s No. 1. *Touché*.
 
-[](https://github.com/bentwheel/careercast-viz/blob/master/newman.jpg?raw=true)
+![](https://github.com/bentwheel/careercast-viz/blob/master/newman.jpg?raw=true)
 
     rankings_url <- "https://www.careercast.com/jobs-rated/2019-jobs-rated-report?page=0"
     scrape_careercast_page(rankings_url) %>% kable()
