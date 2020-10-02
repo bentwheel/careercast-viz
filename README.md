@@ -56,50 +56,390 @@ report, which ranks careers on an overall index based on job stress
 levels, projected career growth outlook, and work environment. Sure
 enough, in 2013, there it was in the number one slot:
 
-[](https://github.com/bentwheel/careercast-viz/blob/master/topjob2013.jpg?raw=true)
+[](https://github.com/bentwheel/careercast-viz/blob/master/topjob2013.JPG?raw=true)
 
 I love being an actuary, and I think most actuaries love being
 actuaries, so I shimmied on over to the [CareerCast Top 200 Careers of
 2019](https://www.careercast.com/jobs-rated/2019-jobs-rated-report)
 report, and there it was, halfway down the Top 20 at \#10.
 
-[](https://github.com/bentwheel/careercast-viz/blob/master/actuaryjob2019.jpg?raw=true)
+[](https://github.com/bentwheel/careercast-viz/blob/master/actuaryjob2019.JPG?raw=true)
 
 What happened? And what had taken the top spot? Was it… no.. it couldn’t
 be. Could it?
 
-[](https://github.com/bentwheel/careercast-viz/blob/master/dsjob2019.jpg?raw=true)
+[](https://github.com/bentwheel/careercast-viz/blob/master/dsjob2019.JPG?raw=true)
 
 Of course it’s No. 1. *Touché*.
 
 [](https://github.com/bentwheel/careercast-viz/blob/master/newman.jpg?raw=true)
 
     rankings_url <- "https://www.careercast.com/jobs-rated/2019-jobs-rated-report?page=0"
-    scrape_careercast_page(rankings_url)
+    scrape_careercast_page(rankings_url) %>% kable()
 
-    ## # A tibble: 20 x 5
-    ##    career           overall_rank work_environment_~ stress_rank proj_growth_rank
-    ##    <chr>            <chr>        <chr>              <chr>       <chr>           
-    ##  1 Data Scientist   1/200        4/200              42/200      37/200          
-    ##  2 Statistician     2/200        11/200             43/200      7/200           
-    ##  3 University Prof~ 3/200        1/200              5/200       54/200          
-    ##  4 Occupational Th~ 4/200        6/200              34/200      22/200          
-    ##  5 Genetic Counsel~ 5/200        25/200             15/200      12/200          
-    ##  6 Medical Service~ 6/200        39/200             20/200      32/200          
-    ##  7 Information Sec~ 7/200        44/200             26/200      15/200          
-    ##  8 Mathematician    8/200        55/200             32/200      7/200           
-    ##  9 Operations Rese~ 9/200        47/200             8/200       18/200          
-    ## 10 Actuary          10/200       8/200              80/200      28/200          
-    ## 11 Software Develo~ 11/200       68/200             27/200      22/200          
-    ## 12 Speech Patholog~ 12/200       46/200             22/200      41/200          
-    ## 13 Dental Hygienist 13/200       48/200             19/200      32/200          
-    ## 14 Audiologist      14/200       68/200             4/200       29/200          
-    ## 15 Radiation Thera~ 15/200       8/200              67/200      72/200          
-    ## 16 Web Developer    16/200       32/200             49/200      54/200          
-    ## 17 Application Sof~ 17/200       141/200            27/200      9/200           
-    ## 18 Physical Therap~ 18/200       105/200            47/200      15/200          
-    ## 19 Physicist        18/200       44/200             78/200      63/200          
-    ## 20 Optometrist      20/200       78/200             87/200      41/200
+<table>
+<thead>
+<tr>
+<th style="text-align:left;">
+career
+</th>
+<th style="text-align:left;">
+overall\_rank
+</th>
+<th style="text-align:left;">
+work\_environment\_rank
+</th>
+<th style="text-align:left;">
+stress\_rank
+</th>
+<th style="text-align:left;">
+proj\_growth\_rank
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Data Scientist
+</td>
+<td style="text-align:left;">
+1/200
+</td>
+<td style="text-align:left;">
+4/200
+</td>
+<td style="text-align:left;">
+42/200
+</td>
+<td style="text-align:left;">
+37/200
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Statistician
+</td>
+<td style="text-align:left;">
+2/200
+</td>
+<td style="text-align:left;">
+11/200
+</td>
+<td style="text-align:left;">
+43/200
+</td>
+<td style="text-align:left;">
+7/200
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+University Professor
+</td>
+<td style="text-align:left;">
+3/200
+</td>
+<td style="text-align:left;">
+1/200
+</td>
+<td style="text-align:left;">
+5/200
+</td>
+<td style="text-align:left;">
+54/200
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Occupational Therapist
+</td>
+<td style="text-align:left;">
+4/200
+</td>
+<td style="text-align:left;">
+6/200
+</td>
+<td style="text-align:left;">
+34/200
+</td>
+<td style="text-align:left;">
+22/200
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Genetic Counselor
+</td>
+<td style="text-align:left;">
+5/200
+</td>
+<td style="text-align:left;">
+25/200
+</td>
+<td style="text-align:left;">
+15/200
+</td>
+<td style="text-align:left;">
+12/200
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Medical Services Manager
+</td>
+<td style="text-align:left;">
+6/200
+</td>
+<td style="text-align:left;">
+39/200
+</td>
+<td style="text-align:left;">
+20/200
+</td>
+<td style="text-align:left;">
+32/200
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Information Security Analyst
+</td>
+<td style="text-align:left;">
+7/200
+</td>
+<td style="text-align:left;">
+44/200
+</td>
+<td style="text-align:left;">
+26/200
+</td>
+<td style="text-align:left;">
+15/200
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Mathematician
+</td>
+<td style="text-align:left;">
+8/200
+</td>
+<td style="text-align:left;">
+55/200
+</td>
+<td style="text-align:left;">
+32/200
+</td>
+<td style="text-align:left;">
+7/200
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Operations Research Analyst
+</td>
+<td style="text-align:left;">
+9/200
+</td>
+<td style="text-align:left;">
+47/200
+</td>
+<td style="text-align:left;">
+8/200
+</td>
+<td style="text-align:left;">
+18/200
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Actuary
+</td>
+<td style="text-align:left;">
+10/200
+</td>
+<td style="text-align:left;">
+8/200
+</td>
+<td style="text-align:left;">
+80/200
+</td>
+<td style="text-align:left;">
+28/200
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Software Developer
+</td>
+<td style="text-align:left;">
+11/200
+</td>
+<td style="text-align:left;">
+68/200
+</td>
+<td style="text-align:left;">
+27/200
+</td>
+<td style="text-align:left;">
+22/200
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Speech Pathologist
+</td>
+<td style="text-align:left;">
+12/200
+</td>
+<td style="text-align:left;">
+46/200
+</td>
+<td style="text-align:left;">
+22/200
+</td>
+<td style="text-align:left;">
+41/200
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Dental Hygienist
+</td>
+<td style="text-align:left;">
+13/200
+</td>
+<td style="text-align:left;">
+48/200
+</td>
+<td style="text-align:left;">
+19/200
+</td>
+<td style="text-align:left;">
+32/200
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Audiologist
+</td>
+<td style="text-align:left;">
+14/200
+</td>
+<td style="text-align:left;">
+68/200
+</td>
+<td style="text-align:left;">
+4/200
+</td>
+<td style="text-align:left;">
+29/200
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Radiation Therapist
+</td>
+<td style="text-align:left;">
+15/200
+</td>
+<td style="text-align:left;">
+8/200
+</td>
+<td style="text-align:left;">
+67/200
+</td>
+<td style="text-align:left;">
+72/200
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Web Developer
+</td>
+<td style="text-align:left;">
+16/200
+</td>
+<td style="text-align:left;">
+32/200
+</td>
+<td style="text-align:left;">
+49/200
+</td>
+<td style="text-align:left;">
+54/200
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Application Software Developer
+</td>
+<td style="text-align:left;">
+17/200
+</td>
+<td style="text-align:left;">
+141/200
+</td>
+<td style="text-align:left;">
+27/200
+</td>
+<td style="text-align:left;">
+9/200
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Physical Therapist
+</td>
+<td style="text-align:left;">
+18/200
+</td>
+<td style="text-align:left;">
+105/200
+</td>
+<td style="text-align:left;">
+47/200
+</td>
+<td style="text-align:left;">
+15/200
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Physicist
+</td>
+<td style="text-align:left;">
+18/200
+</td>
+<td style="text-align:left;">
+44/200
+</td>
+<td style="text-align:left;">
+78/200
+</td>
+<td style="text-align:left;">
+63/200
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Optometrist
+</td>
+<td style="text-align:left;">
+20/200
+</td>
+<td style="text-align:left;">
+78/200
+</td>
+<td style="text-align:left;">
+87/200
+</td>
+<td style="text-align:left;">
+41/200
+</td>
+</tr>
+</tbody>
+</table>
 
 As you can see, I went ahead and made a handy little function to handle
 all the webscraping. All I need to do is insert the URL for the year I

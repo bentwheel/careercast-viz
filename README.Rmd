@@ -25,15 +25,15 @@ Also, it's helpful to have a [CSS SelectorGadget](https://selectorgadget.com/) o
 
 I turned my attention to the [CareerCast Top 200 Careers of 2013](https://www.careercast.com/jobs-rated/best-worst-jobs-2013) report, which ranks careers on an overall index based on job stress levels, projected career growth outlook, and work environment. Sure enough, in 2013, there it was in the number one slot:
 
-[](https://github.com/bentwheel/careercast-viz/blob/master/topjob2013.jpg?raw=true)
+[](https://github.com/bentwheel/careercast-viz/blob/master/topjob2013.JPG?raw=true)
 
 I love being an actuary, and I think most actuaries love being actuaries, so I shimmied on over to the [CareerCast Top 200 Careers of 2019](https://www.careercast.com/jobs-rated/2019-jobs-rated-report) report, and there it was, halfway down the Top 20 at #10.
 
-[](https://github.com/bentwheel/careercast-viz/blob/master/actuaryjob2019.jpg?raw=true)
+[](https://github.com/bentwheel/careercast-viz/blob/master/actuaryjob2019.JPG?raw=true)
 
 What happened? And what had taken the top spot? Was it... no.. it couldn't be. Could it?
 
-[](https://github.com/bentwheel/careercast-viz/blob/master/dsjob2019.jpg?raw=true)
+[](https://github.com/bentwheel/careercast-viz/blob/master/dsjob2019.JPG?raw=true)
 
 Of course it's No. 1. *Touché*.
 
@@ -83,7 +83,7 @@ scrape_careercast_page <- function(url)
 ```{r display_2019_data}
 
 rankings_url <- "https://www.careercast.com/jobs-rated/2019-jobs-rated-report?page=0"
-scrape_careercast_page(rankings_url)
+scrape_careercast_page(rankings_url) %>% kable()
   
 ```
 
