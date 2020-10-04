@@ -46,6 +46,8 @@ library(tidyverse)
 library(rvest)
 library(xml2)
 library(kableExtra)
+library(viridis)
+library(gghighlight)
 
 scrape_careercast_page <- function(url) 
 {
@@ -181,8 +183,12 @@ data <- data %>%
 # job growth, stress, etc.
 
 
-plotRanking <- function(metric, data)
+plotRanking <- function(metric, data, nthresh, mthresh, highlight=F)
 {
+  
+  #metric <- "proj_growth_rank"
+  #nthresh <- 8 
+  #mthresh <- 3
   
   metricLabel = ifelse(metric == "overall_rank","Overall Rank",
                  ifelse(metric == "work_environment_rank","Work Environment Rank",
@@ -190,34 +196,71 @@ plotRanking <- function(metric, data)
   
   print(metricLabel)
   
+  evalExtra <- "return(plot)"
+  if(highlight) 
+    evalExtra <- 'return(plot + gghighlight(career %in% c("Actuary","Data Scientist")))'
+  
   plot.data <- data %>% 
     select(career, eval(metric), year) %>% 
     separate(eval(metric), into=c("num","denom"), sep="/") %>% 
-    mutate(num = as.numeric(num))
+    mutate(num = as.numeric(num),
+           year = as.Date(paste0(year,"-07-01")))
   
-  plot.data <- plot.data %>% 
+  plot.data <- data %>% 
+    select(career, overall_rank, year) %>% 
+    separate(overall_rank, into=c("num","denom"), sep="/") %>% 
+    mutate(num = as.numeric(num)) %>% 
     group_by(career) %>% 
-    summarize(n = n()) %>% 
-    filter(n >= 6) %>% 
+    summarize(n = mean(num),
+              m = n()) %>% 
+    filter(n <= nthresh & m > mthresh) %>% 
+    ungroup() %>% 
     left_join(plot.data)
+  
+  ybreaks <- seq(1,max(plot.data$num), floor(max(plot.data$num) / 20))
   
   plot <- plot.data %>% 
     ggplot(aes(x = year, y = num, color = career)) + 
     geom_line(size = 1.5) +
-    geom_point(size = 2) + 
-    scale_y_reverse(labels = scales::label_ordinal(), breaks=seq(1:20)) +
+    geom_point(size = 1.75) + 
+    scale_color_manual(values =c("#d4b9da","#c994c7","#df65b0","#e7298a","#ce1256","#980043","#67001f")) +
+    scale_y_reverse(labels = scales::label_ordinal(), breaks=ybreaks) +
+    scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
     labs(x = "Year",
          y = "Rank",
          title = paste0(metricLabel, " over the Last Decade-ish"),
-         subtitle = "CareerCast.com Career Rankings, 2011 - 2019") +
-    theme_minimal()
+         subtitle = "CareerCast.com Career Rankings, 2011 - 2019",
+         color = "Career") +
+    theme_minimal() +
+    theme(legend.position = "bottom",
+          legend.text = element_text(size = 8)) +
+    guides(col = guide_legend(ncol = 3))
     
-  plot
+    
+  eval(parse(text=evalExtra))
 }
 ```
 
 ```{r plots}
-plotRanking("overall_rank", data=data)
+
+# Here we go - plot those careers with an average overall ranking of 8 or better, with no fewer than three years reported in the top 20.
+
+library(plotly)
+
+overall_rank <- plotRanking("overall_rank", data=data, 8, 3, F)
+ggsave("./overall_rank.png", overall_rank, width=7, height=5)
+ggplotly(overall_rank)
+
+overall_rank_a_ds <- plotRanking("overall_rank", data=data, 8, 3, T)
+ggsave("./overall_rank_a_ds.png", overall_rank_a_ds)
+
+plotRanking("stress_rank", data=data, 8, 3,T)
+
+
+plotRanking("proj_growth_rank", data=data, 8, 3,T)
+plotRanking("work_environment_rank", data=data, 8, 3,T)
+
 
 ```
+
 
