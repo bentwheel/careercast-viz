@@ -1,5 +1,5 @@
 ---
-title: "What Actuaries Do Is Changing"
+title: "The Corpus of Actuarial Work is Changing"
 output: md_document
 ---
 
@@ -51,33 +51,49 @@ library(gghighlight)
 
 scrape_careercast_page <- function(url) 
 {
-  # Scrape HTML file from 2019 job report
-  
+  # Scrape HTML file from 2018 job report, page 2 (testing)
+  #url <- "https://www.careercast.com/jobs-rated/2012-ranking-200-jobs-best-worst"
   rankings_html <- read_html(url)
   
-  get_rankings_data <- as_list(xml2::xml_find_all(rankings_html,'//*[contains(concat( " ", @class, " " ), concat( " ", "aiNormalizedNumber", " " ))] | //*[contains(concat( " ", @class, " " ), concat( " ", "views-field-field-name", " " ))]')) %>% 
-    flatten() %>% 
-    flatten() %>% 
-    flatten() %>% 
-    tibble(data = str_trim(.)) %>% 
-    select(data) %>% 
-    filter(data != "") %>% 
-    mutate(n = (row_number() - 1) %% 6,
-           label = case_when(n == 0 ~ "rank",
-                             n == 1 ~ "career",
-                             n == 2 ~ "overall_rank",
-                             n == 3 ~ "work_environment_rank",
-                             n == 4 ~ "stress_rank",
-                             n == 5 ~ "proj_growth_rank")) %>% 
-    filter(n != 0) %>% 
-    arrange(n) %>% 
-    mutate(n = (row_number() - 1) %% 20) %>% 
-    group_by(n) %>% 
-    pivot_wider(names_from = label, values_from = data) %>% 
-    ungroup() %>% 
-    select(-n)
+  get_rankings_data <- as_list(xml2::xml_find_all(rankings_html,'//*[contains(concat( " ", @class, " " ), concat( " ", "aiNormalizedNumber", " " ))] | //*[contains(concat( " ", @class, " " ), concat( " ", "views-field-field-name", " " ))]')) 
+  
+ careers <- get_rankings_data %>% 
+   keep(~length(.x) ==3) %>% 
+   map(~str_trim(.x[["a"]][[3]])) %>% 
+   flatten() %>% 
+   enframe(value = "career") %>% 
+   group_by(career) %>% 
+   filter(n() == 1) %>% 
+   ungroup()
+ 
+ careers_loc <- map(careers$career,
+                    function(x) detect_index(get_rankings_data, ~length(.x) == 3 && str_trim(.x[["a"]][[3]]) == x)) %>% 
+   enframe(value = "index") %>% 
+   bind_cols(careers) %>% 
+   select(name.y = name...3, index, career)
+   
+foo <- flatten(flatten(get_rankings_data)) %>% 
+  keep(~is.character(.x)) %>% 
+  modify(str_trim) %>% 
+  enframe() %>% 
+  filter(value != "")%>% 
+  mutate(n = row_number()) %>% 
+  left_join(careers_loc, by=c("value"="career")) %>% 
+  fill(name.y, index) %>% 
+  mutate(ranking_num = n - as.numeric(index),
+         label = case_when(ranking_num == 1 ~ "overall_rank",
+                           ranking_num == 2 ~ "work_environment_rank",
+                           ranking_num == 3 ~ "stress_rank",
+                           ranking_num == 4 ~ "proj_growth_rank")) %>%
+  select(name = name.y, label, value) %>% 
+  drop_na() %>% 
+  group_by(name) %>% 
+  pivot_wider(names_from = label, values_from = value)%>% 
+  ungroup() %>% 
+  inner_join(careers) %>% 
+  select(index = name, career, overall_rank:proj_growth_rank)
 
-    return(get_rankings_data)  
+  return(foo)  
 }
 
 ```
@@ -85,7 +101,8 @@ scrape_careercast_page <- function(url)
 ```{r display_2019_data}
 
 rankings_url <- "https://www.careercast.com/jobs-rated/2019-jobs-rated-report?page=0"
-scrape_careercast_page(rankings_url) %>% kable()
+t <- scrape_careercast_page(rankings_url)
+t %>% kable()
   
 ```
 
@@ -99,27 +116,36 @@ By the way, since it's only ten years, I've chosen to do it by hand, but if we w
 
 ```{r pull_decade, include=FALSE}
 
+top100_scrape <- function(url)
+{
+  d <- scrape_careercast_page(url)
+  for(i in 1:4)
+  {
+    d <- d %>% 
+      union_all(scrape_careercast_page(paste0(rankings_url, "?page=", i)))
+  }
+  return(d)
+}
+
+
 # 2019
-rankings_url <- "https://www.careercast.com/jobs-rated/2019-jobs-rated-report?page=0"
-data <- scrape_careercast_page(rankings_url) %>% 
+rankings_url <- "https://www.careercast.com/jobs-rated/2019-jobs-rated-report"
+data2019 <- top100_scrape(rankings_url) %>% 
   mutate(year = 2019)
+
+data <- data2019
 
 # 2018 - there is an issue here that has the overall ranking starting at 2 instead of 1. I've corrected for this.
 rankings_url <- "https://www.careercast.com/jobs-rated/2018-jobs-rated-report"
-data2018 <- scrape_careercast_page(rankings_url) %>% 
+data2018 <- top100_scrape(rankings_url) %>% 
   mutate(year = 2018)
-  
-data2018 <- data2018 %>% 
-  separate(overall_rank,  sep="/", into=c("num","den")) %>% 
-  mutate(num = as.character(as.numeric(num) - 1)) %>% 
-  unite(col="overall_rank", num, den, sep="/")
 
 data <- data %>% 
   union_all(data2018)
 
 # 2017 - no issues
 rankings_url <- "https://www.careercast.com/jobs-rated/2017-jobs-rated-report"
-data2017 <- scrape_careercast_page(rankings_url) %>% 
+data2017 <- top100_scrape(rankings_url) %>% 
   mutate(year = 2017)
 
 data <- data %>% 
@@ -127,7 +153,7 @@ data <- data %>%
 
 # 2016 - URL format is slightly different.
 rankings_url <- "https://www.careercast.com/jobs-rated/jobs-rated-report-2016-ranking-200-jobs"
-data2016 <- scrape_careercast_page(rankings_url) %>% 
+data2016 <- top100_scrape(rankings_url) %>% 
   mutate(year = 2016)
 
 data <- data %>% 
@@ -135,7 +161,7 @@ data <- data %>%
 
 # 2015 - again slightly different URL
 rankings_url <- "https://www.careercast.com/jobs-rated/jobs-rated-report-2015-ranking-top-200-jobs"
-data2015 <- scrape_careercast_page(rankings_url) %>% 
+data2015 <- top100_scrape(rankings_url) %>% 
   mutate(year = 2015)
 
 data <- data %>% 
@@ -143,7 +169,7 @@ data <- data %>%
 
 # 2014 - again a slightly different URL
 rankings_url <- "https://www.careercast.com/jobs-rated/jobs-rated-2014-ranking-200-jobs-best-worst"
-data2014 <- scrape_careercast_page(rankings_url) %>% 
+data2014 <- top100_scrape(rankings_url) %>% 
   mutate(year = 2014)
 
 data <- data %>% 
@@ -151,7 +177,7 @@ data <- data %>%
 
 # 2013 - again a slightly different URL than last year
 rankings_url <- "https://www.careercast.com/jobs-rated/best-worst-jobs-2013"
-data2013 <- scrape_careercast_page(rankings_url) %>% 
+data2013 <- top100_scrape(rankings_url) %>% 
   mutate(year = 2013)
 
 data <- data %>% 
@@ -159,15 +185,15 @@ data <- data %>%
 
 # 2012 - again a slightly different URL than last year
 rankings_url <- "https://www.careercast.com/jobs-rated/2012-ranking-200-jobs-best-worst"
-data2012 <- scrape_careercast_page(rankings_url) %>% 
-  mutate(year = 2012)
+data2012 <- top100_scrape(rankings_url) %>% 
+  mutate(year = 2012) 
 
 data <- data %>% 
   union_all(data2012)
 
 # 2011 - the same URL format as the 2012 report! huzzah!
 rankings_url <- "https://www.careercast.com/jobs-rated/2011-ranking-200-jobs-best-worst"
-data2011 <- scrape_careercast_page(rankings_url) %>% 
+data2011 <- top100_scrape(rankings_url) %>% 
   mutate(year = 2011)
 
 data <- data %>% 
@@ -182,13 +208,12 @@ data <- data %>%
 # As usual, we'll set up a plot function that gives a plot of the ranking we want - overall,
 # job growth, stress, etc.
 
+library(plotly)
 
-plotRanking <- function(metric, data, nthresh, mthresh, highlight=F)
+plotRanking <- function(metric, data)
 {
-  
-  #metric <- "proj_growth_rank"
-  #nthresh <- 8 
-  #mthresh <- 3
+  # for testing
+  #metric <- "stress_rank"
   
   metricLabel = ifelse(metric == "overall_rank","Overall Rank",
                  ifelse(metric == "work_environment_rank","Work Environment Rank",
@@ -196,70 +221,85 @@ plotRanking <- function(metric, data, nthresh, mthresh, highlight=F)
   
   print(metricLabel)
   
-  evalExtra <- "return(plot)"
-  if(highlight) 
-    evalExtra <- 'return(plot + gghighlight(career %in% c("Actuary","Data Scientist")))'
-  
   plot.data <- data %>% 
+    unnest(cols = c(career, overall_rank, work_environment_rank, stress_rank, proj_growth_rank)) %>% 
     select(career, eval(metric), year) %>% 
     separate(eval(metric), into=c("num","denom"), sep="/") %>% 
     mutate(num = as.numeric(num),
-           year = as.Date(paste0(year,"-07-01")))
+           year = as.Date(paste0(year,"-01-01")))
   
   plot.data <- data %>% 
-    select(career, overall_rank, year) %>% 
-    separate(overall_rank, into=c("num","denom"), sep="/") %>% 
+    unnest(cols = c(career, overall_rank, work_environment_rank, stress_rank, proj_growth_rank)) %>% 
+    select(career, eval(metric), year) %>% 
+    separate(eval(metric), into=c("num","denom"), sep="/") %>% 
     mutate(num = as.numeric(num)) %>% 
     group_by(career) %>% 
     summarize(n = mean(num),
               m = n()) %>% 
-    filter(n <= nthresh & m > mthresh) %>% 
     ungroup() %>% 
-    left_join(plot.data)
+    filter(n < 30) %>% 
+    left_join(plot.data) %>% 
+    drop_na()
   
   ybreaks <- seq(1,max(plot.data$num), floor(max(plot.data$num) / 20))
   
   plot <- plot.data %>% 
     ggplot(aes(x = year, y = num, color = career)) + 
-    geom_line(size = 1.5) +
-    geom_point(size = 1.75) + 
-    scale_color_manual(values =c("#d4b9da","#c994c7","#df65b0","#e7298a","#ce1256","#980043","#67001f")) +
+    geom_line(size = 1.1) +
     scale_y_reverse(labels = scales::label_ordinal(), breaks=ybreaks) +
     scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
     labs(x = "Year",
          y = "Rank",
          title = paste0(metricLabel, " over the Last Decade-ish"),
-         subtitle = "CareerCast.com Career Rankings, 2011 - 2019",
-         color = "Career") +
+         subtitle = "CareerCast.com Careers w/ Mean Ranking of 30 or better, 2011 - 2019",
+         color = "Careers") +
     theme_minimal() +
     theme(legend.position = "bottom",
-          legend.text = element_text(size = 8)) +
+          legend.text = element_text(size = 8),
+          panel.grid.major.x = element_blank()) +
     guides(col = guide_legend(ncol = 3))
+  
+  ggsave(paste0("./",metric,".png"), plot, width=7, height=5)
+
     
-    
-  eval(parse(text=evalExtra))
+  plot <- ggplotly(plot) %>% 
+      layout(title = 
+               list(text = paste0(metricLabel, " over the Last Decade-ish",
+                    "<br>",
+                    "<sup>",
+                    "CareerCast.com Careers w/ Mean Ranking of 30 or better, 2011 - 2019",
+                    "</sup>")))
+  
+  for(i in 1:length(plot$x$data))
+  {
+    if (!(plot$x$data[[i]][["name"]] %in% 
+      c("Actuary", "Data Scientist")))
+    {
+      plot$x$data[[i]][["visible"]] <- "legendonly"
+    }
+  }
+  
+  return(plot)
 }
+
 ```
 
 ```{r plots}
 
 # Here we go - plot those careers with an average overall ranking of 8 or better, with no fewer than three years reported in the top 20.
 
-library(plotly)
 
-overall_rank <- plotRanking("overall_rank", data=data, 8, 3, F)
-ggsave("./overall_rank.png", overall_rank, width=7, height=5)
-ggplotly(overall_rank)
+overall_rank <- plotRanking("overall_rank", data=data)
+overall_rank
 
-overall_rank_a_ds <- plotRanking("overall_rank", data=data, 8, 3, T)
-ggsave("./overall_rank_a_ds.png", overall_rank_a_ds)
+stress_rank <- plotRanking("stress_rank", data=data) 
+stress_rank
 
-plotRanking("stress_rank", data=data, 8, 3,T)
+proj_growth_rank <- plotRanking("proj_growth_rank", data=data)
+proj_growth_rank
 
-
-plotRanking("proj_growth_rank", data=data, 8, 3,T)
-plotRanking("work_environment_rank", data=data, 8, 3,T)
-
+work_environment_rank <- plotRanking("work_environment_rank", data=data)
+work_environment_rank
 
 ```
 
